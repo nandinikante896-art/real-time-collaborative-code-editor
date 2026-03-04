@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>⚡ Real-Time Code Editor</title>
+    <script src="/socket.io/socket.io.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            color: white;
+        }
+
+        header {
+            background-color: #111827;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+            border-bottom: 2px solid #334155;
+        }
+
+        .title {
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .info {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .editor-container {
+            flex: 1;
+            padding: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            border: none;
+            outline: none;
+            resize: none;
+            padding: 20px;
+            font-size: 16px;
+            font-family: monospace;
+            background-color: #1e293b;
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(0,0,0,0.6);
+        }
+
+        textarea::placeholder {
+            color: #64748b;
+        }
+
+        footer {
+            background-color: #111827;
+            text-align: center;
+            padding: 8px;
+            font-size: 13px;
+            color: #94a3b8;
+            border-top: 2px solid #334155;
+        }
+
+        .online-dot {
+            color: #22c55e;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="title">⚡💻 Real-Time Collaborative Code Editor</div>
+    <div class="info">
+        👤 <span id="userId">Connecting...</span> |
+        🟢 <span class="online-dot" id="onlineCount">0</span> Users Online
+    </div>
+</header>
+
+<div class="editor-container">
+    <textarea id="editor" placeholder="💡 Start typing your code here..."></textarea>
+</div>
+
+<footer>
+    🚀 Built with Node.js & Socket.IO | 👩‍💻 Developed by Nandini
+</footer>
+
+<script>
+    const socket = io();
+    const editor = document.getElementById("editor");
+    const userIdDisplay = document.getElementById("userId");
+    const onlineDisplay = document.getElementById("onlineCount");
+
+    socket.on("connect", () => {
+        userIdDisplay.textContent = socket.id;
+    });
+
+    socket.on("online-users", (count) => {
+        onlineDisplay.textContent = count;
+    });
+
+    socket.on("code-update", (code) => {
+        editor.value = code;
+    });
+
+    editor.addEventListener("keyup", () => {
+        socket.emit("code-change", editor.value);
+    });
+</script>
+
+</body>
+</html>
