@@ -1,12 +1,20 @@
+
 const express = require("express");
 const http = require("http");
+const path = require("path");
 const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use(express.static("public"));
+// Serve the existing index.html from the repository root
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "index.html"));
+});
+
+// Serve static assets if a public folder exists
+app.use(express.static(path.join(__dirname, "public")));
 
 let onlineUsers = 0;
 
@@ -19,11 +27,13 @@ io.on("connection", (socket) => {
     });
 
     socket.on("disconnect", () => {
-        onlineUsers--;
+        onlineUsers = Math.max(0, onlineUsers - 1);
         io.emit("online-users", onlineUsers);
     });
 });
 
-server.listen(4000, () => {
-    console.log("Server running on http://localhost:4000");
+const PORT = process.env.PORT || 4000;
+
+server.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server running on port ${PORT}`);
 });
